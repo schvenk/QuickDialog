@@ -35,6 +35,7 @@ UIDatePicker *QDATEENTRY_GLOBAL_PICKER;
 
 + (UIDatePicker *)getPickerForDate {
     QDATEENTRY_GLOBAL_PICKER = [[UIDatePicker alloc] init];
+    QDATEENTRY_GLOBAL_PICKER.minuteInterval = 30;
     return QDATEENTRY_GLOBAL_PICKER;
 }
 
