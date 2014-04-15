@@ -13,6 +13,11 @@
 //
 
 #import "QuickDialogTableView.h"
+#import "QEntryElement.h"
+
+/**
+  QRadioElement: allows user to select one of multiple options available. Automatically pushes a new table with the item to be selected.
+*/
 
 @interface QRadioElement : QEntryElement {
     NSArray *_items;
@@ -24,6 +29,7 @@
 @property(nonatomic, assign) id selectedItem;
 @property(nonatomic, assign, readwrite) NSInteger selected;
 @property(nonatomic, retain) NSArray *values;
+@property(nonatomic, strong) NSArray *itemsImageNames;
 
 - (QRadioElement *)initWithDict:(NSDictionary *)valuesDictionary selected:(int)selected title:(NSString *)title;
 
@@ -34,4 +40,7 @@
 
 - (QRadioElement *)initWithItems:(NSArray *)stringArray selected:(NSInteger)selected;
 - (QRadioElement *)initWithItems:(NSArray *)stringArray selected:(NSInteger)selected title:(NSString *)title;
+
+- (void)updateCell:(QEntryTableViewCell *)cell selectedValue:(id)selectedValue;
+
 @end

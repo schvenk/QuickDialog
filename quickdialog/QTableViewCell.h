@@ -14,17 +14,24 @@
 
 
 #import <Foundation/Foundation.h>
-#import "QuickDialog.h"
+
+@class QElement;
 
 typedef enum {
-    QLabelingPolicyTrimTitle,
-    QLabelingPolicyTrimValue
+    QLabelingPolicyTrimValue,
+    QLabelingPolicyTrimTitle
 } QLabelingPolicy;
+
+static const int QCellMarginDouble = 16;
+static const int QCellMargin = 8;
 
 @interface QTableViewCell : UITableViewCell
 
 - (QTableViewCell *)initWithReuseIdentifier:(NSString *)string;
 
+- (void)layoutSubviewsInsideBounds:(CGRect)bounds;
+
 @property (nonatomic) QLabelingPolicy labelingPolicy;
 
+- (void)applyAppearanceForElement:(QElement *)element;
 @end

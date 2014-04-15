@@ -15,11 +15,17 @@
 
 #import <Foundation/Foundation.h>
 
+@class QSection;
+@class QRootElement;
+@class QElement;
+
 
 @interface QBindingEvaluator : NSObject {
 }
 
 - (void)bindObject:(id)section toData:(id)data;
+
+- (void)bindObject:(id)object toData:(id)data withString:(id)string;
 
 - (void)bindSection:(QSection *)section toCollection:(NSArray *)items;
 

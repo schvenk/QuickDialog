@@ -23,7 +23,6 @@
     self = [super init];
     _radioElement = radioElement;
     _index = index;
-    _title = [[radioElement.items objectAtIndex:_index] description];
     return self;
 }
 
@@ -31,7 +30,6 @@
     self = [super init];
     _radioSection = section;
     _index = index;
-    _title = [[_radioSection.items objectAtIndex:_index] description];
     return self;
 }
 
@@ -40,6 +38,9 @@
     cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     NSInteger selectedIndex = _radioElement==nil? _radioSection.selected : _radioElement.selected;
     cell.accessoryType = selectedIndex == _index ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+    cell.textLabel.textAlignment = NSTextAlignmentLeft; // hardcoded so that appearance doesn't change it
+    cell.textLabel.textColor = self.enabled ? self.appearance.valueColorEnabled : self.appearance.valueColorDisabled;
+    cell.imageView.image = self.image;
     return cell;
 }
 
@@ -57,11 +58,10 @@
         selectedCell.accessoryType = UITableViewCellAccessoryCheckmark;
     }
 
-    if (_radioElement!= nil){
+    if (_radioElement!= nil)
+    {
         _radioElement.selected = _index;
-
-
-        [_radioElement handleElementSelected:controller];
+        [_radioElement fieldDidEndEditing];
         tableView.userInteractionEnabled = NO;
 
         [NSTimer scheduledTimerWithTimeInterval:0.3
@@ -70,9 +70,15 @@
             userInfo:nil
             repeats:NO];
 
-    } else if (_radioSection!=nil){
+    }
+    else if (_radioSection!=nil)
+    {
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
+
         _radioSection.selected = _index;
+        if (_radioSection.onSelected) {
+            _radioSection.onSelected();
+        }
     }
 }
 

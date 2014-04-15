@@ -14,9 +14,11 @@
 
 #import "QLabelElement.h"
 
-@interface QButtonElement : QLabelElement
+/**
+  QButtonElement: centered title that looks like a button.
+*/
 
-@property (nonatomic, assign, getter=isEnabled) BOOL enabled;
+@interface QButtonElement : QLabelElement
 
 - (QButtonElement *)init;
 

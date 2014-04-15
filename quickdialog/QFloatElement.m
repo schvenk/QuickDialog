@@ -13,22 +13,38 @@
 //
 
 #import "QFloatElement.h"
+#import "QFloatTableViewCell.h"
 
 @implementation QFloatElement
 
 @synthesize floatValue = _floatValue;
+@synthesize minimumValue = _minimumValue;
+@synthesize maximumValue = _maximumValue;
+
+- (QFloatElement *)init {
+    return [self initWithValue:0.0];
+}
 
 - (QFloatElement *)initWithTitle:(NSString *)title value:(float)value {
     self = [super initWithTitle:title Value:nil] ;
-    _floatValue = value;
+    if (self) {
+        _floatValue = value;
+        _minimumValue = 0.0;
+        _maximumValue = 1.0;
+        self.enabled = YES;
+    }
     return self;
 }
 
 
 - (QElement *)initWithValue:(float)value {
     self = [super init];
-    _floatValue = value;
-
+    if (self) {
+        _floatValue = value;
+        _minimumValue = 0.0;
+        _maximumValue = 1.0;
+        self.enabled = YES;
+    }
     return self;
 }
 
@@ -38,25 +54,37 @@
     [obj setValue:[NSNumber numberWithFloat:_floatValue] forKey:_key];
 }
 
-- (CGFloat)calculateSliderWidth:(QuickDialogTableView *)view cell:(UITableViewCell *)cell {
-    if (_title==nil)
-        return view.contentSize.width-40;
-    return view.contentSize.width - [cell.textLabel.text sizeWithFont:[UIFont boldSystemFontOfSize:17]].width - 50;
-}
-
 - (void)valueChanged:(UISlider *)slider {
-   _floatValue = slider.value;
+    self.floatValue = slider.value;
+
+    [self handleEditingChanged];
 }
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
-    UITableViewCell *cell = [super getCellForTableView:tableView controller:controller];
+    QFloatTableViewCell *cell = [[QFloatTableViewCell alloc] initWithFrame:CGRectZero];
 
-    UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(0, 0, [self calculateSliderWidth:tableView cell:cell], 20)];
-    [slider addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
-    slider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    slider.value = _floatValue;
-    cell.accessoryView = slider;
+    [cell.slider addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
+    cell.slider.minimumValue = _minimumValue;
+    cell.slider.maximumValue = _maximumValue;
+    cell.slider.value = _floatValue;
+    
+    cell.textLabel.text = _title;
+    cell.detailTextLabel.text = [_value description];
+    cell.imageView.image = _image;
+    cell.accessoryType = self.accessoryType != UITableViewCellAccessoryNone ? self.accessoryType : ( self.sections!= nil || self.controllerAction!=nil ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone);
+    cell.selectionStyle = self.sections!= nil || self.controllerAction!=nil ? UITableViewCellSelectionStyleBlue: UITableViewCellSelectionStyleNone;
+    
     return cell;
+}
+
+- (void)setNilValueForKey:(NSString *)key;
+{
+    if ([key isEqualToString:@"floatValue"]){
+        self.floatValue = 0;
+    }
+    else {
+        [super setNilValueForKey:key];
+    }
 }
 
 

@@ -12,41 +12,35 @@
 // permissions and limitations under the License.
 //
 
-#import "QElement.h"
-#import "QSection.h"
-#import "QuickDialogStyleProvider.h"
 #import "QuickDialogDataSource.h"
 #import "QuickDialogTableDelegate.h"
-#import "QRootElement.h"
 #import <Foundation/Foundation.h>
 #import "UIKit/UIKit.h"
 
-@interface QuickDialogTableView : UITableView {
+@class QSection;
+@class QElement;
+@class QRootElement;
+@protocol QuickDialogDelegate;
 
-
-@private
-    __unsafe_unretained QuickDialogController *_controller;
-    QRootElement *_root;
-    id <UITableViewDataSource> quickformDataSource;
-    id <UITableViewDelegate> quickformDelegate;
-}
+@interface QuickDialogTableView : UITableView
 
 @property(nonatomic, strong) QRootElement *root;
 
-@property(nonatomic, readonly) QuickDialogController *controller;
+@property(weak, nonatomic, readonly) QuickDialogController *controller;
 
-@property(nonatomic, assign) NSObject<QuickDialogStyleProvider> *styleProvider;
+@property(nonatomic, weak) id<QuickDialogDelegate> quickDialogDelegate;
+@property(nonatomic, strong) id <UITableViewDelegate> quickDialogTableDelegate;
+@property(nonatomic, strong) id <UITableViewDataSource> quickDialogDataSource;
+
 @property(nonatomic) BOOL deselectRowWhenViewAppears;
 
-
 - (QuickDialogTableView *)initWithController:(QuickDialogController *)controller;
-
-- (NSIndexPath *)indexForElement:(QElement *)element;
+- (void)deselectRows;
 
 - (UITableViewCell *)cellForElement:(QElement *)element;
+- (void)reloadCellForElements:(QElement *)element, ... NS_REQUIRES_NIL_TERMINATION;
 
-- (void)viewWillAppear;
+- (void)reloadRowHeights;
 
-- (void)reloadCellForElements:(QElement *)element, ...;
-
+- (void)endEditingOnVisibleCells;
 @end

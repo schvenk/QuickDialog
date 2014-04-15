@@ -13,13 +13,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "quickdialog.h"
+#import "QuickDialog.h"
 
 @interface QRootBuilder : NSObject {
 
 }
 
-- (QRootElement *)buildSectionsWithObject:(id)obj;
+- (QRootElement *)buildWithObject:(id)obj;
 
 + (void)trySetProperty:(NSString *)propertyName onObject:(id)target withValue:(id)value localized:(BOOL)shouldLocalize;
 
@@ -27,6 +27,7 @@
 
 - (void)buildSectionWithObject:(id)obj forRoot:(QRootElement *)root;
 
-
 - (QSection *)buildSectionWithObject:(NSDictionary *)dictionary;
+
+
 @end

@@ -12,76 +12,149 @@
 // permissions and limitations under the License.
 //
 
-#import "QDateEntryTableViewCell.h"
+#import "QDateInlineTableViewCell.h"
 
 @implementation QDateTimeInlineElement {
 @private
     NSDate *_maximumDate;
     NSDate *_minimumDate;
 
-    void (^_onValueChanged)();
-
+    __weak QTableViewCell *_cell;
 }
 
-@synthesize dateValue = _dateValue;
 @synthesize mode = _mode;
 @synthesize centerLabel = _centerLabel;
 @synthesize maximumDate = _maximumDate;
 @synthesize minimumDate = _minimumDate;
 @synthesize onValueChanged = _onValueChanged;
+@synthesize minuteInterval = _minuteInterval;
 
 
 - (QDateTimeInlineElement *)init {
     self = [super init];
     _dateValue = [NSDate date];
+    self.keepSelected = YES;
     return self;
 }
 
 - (QDateTimeInlineElement *)initWithKey:(NSString *)key {
     self = [super initWithKey:key];
     _dateValue = [NSDate date];
+    self.keepSelected = YES;
     return self;
 }
 
-- (QDateTimeInlineElement *)initWithTitle:(NSString *)string date:(NSDate *)date {
+- (QDateTimeInlineElement *)initWithTitle:(NSString *)string date:(NSDate *)date andMode:(UIDatePickerMode)mode{
     self = [super initWithTitle:string Value:[date description]];
     if (self!=nil){
         _dateValue = date;
-        _mode = UIDatePickerModeDateAndTime;
+        _mode = mode;
     }
     return self;
 }
 
 
 - (void)setTicksValue:(NSNumber *)ticks {
-    self.dateValue = [NSDate dateWithTimeIntervalSince1970:ticks.doubleValue];
+    if (ticks!=nil)
+        self.dateValue = [NSDate dateWithTimeIntervalSince1970:ticks.doubleValue];
+}
+
+- (void)setDateValue:(NSDate *)date {
+    _dateValue = date;
+}
+
+- (NSDate *)dateValue
+{
+    if (self.mode == UIDatePickerModeDate)   {
+        NSCalendar *gregorian = [[NSCalendar alloc]initWithCalendarIdentifier:NSGregorianCalendar];
+        NSDateComponents *dateComponents = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:_dateValue];
+        _dateValue = [gregorian dateFromComponents:dateComponents];
+    }
+    return _dateValue;
 }
 
 -(NSNumber *)ticksValue {
     return [NSNumber numberWithDouble:[self.dateValue timeIntervalSince1970]];
 }
 
-- (QDateTimeInlineElement *)initWithDate:(NSDate *)date {
-    return [self initWithTitle:nil date:date];
+- (QDateTimeInlineElement *)initWithDate:(NSDate *)date andMode:(UIDatePickerMode)mode{
+    return [self initWithTitle:nil date:date andMode:mode];
 }
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
 
-    QDateEntryTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"QuickformDateTimeInlineElement"];
-    if (cell==nil){
-        cell = [[QDateEntryTableViewCell alloc] init];
-    }
-    [cell prepareForElement:self inTableView:tableView];
-    cell.imageView.image = self.image;
-    cell.selectionStyle = UITableViewCellSelectionStyleBlue ;
+    QTableViewCell *cell= self.showPickerInCell ? [self getInlineCell:tableView] : [self getEntryCell:tableView];
     return cell;
-
 }
+
+- (QDateInlineTableViewCell *)getInlineCell:(QuickDialogTableView *)tableView
+{
+    QDateInlineTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"QuickformDateTimeInlineElement"];
+    if (cell == nil){
+        cell = [[QDateInlineTableViewCell alloc] init];
+    }
+    _cell = cell;
+    [cell prepareForElement:self inTableView:tableView];
+    cell.selectionStyle = !self.enabled || self.showPickerInCell ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleBlue;
+    cell.imageView.image = self.image;
+    cell.labelingPolicy = self.labelingPolicy;
+
+    return cell;
+}
+
+- (QDateEntryTableViewCell *)getEntryCell:(QuickDialogTableView *)tableView
+{
+    QDateEntryTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"QuickformDateTimeInlineElement"];
+    if (cell == nil){
+         cell = [[QDateEntryTableViewCell alloc] init];
+    }
+    _cell = cell;
+    [cell prepareForElement:self inTableView:tableView];
+    cell.selectionStyle = self.enabled ? UITableViewCellSelectionStyleBlue : UITableViewCellSelectionStyleNone;
+    cell.textField.enabled = self.enabled;
+    cell.textField.userInteractionEnabled = self.enabled;
+    cell.imageView.image = self.image;
+    cell.labelingPolicy = self.labelingPolicy;
+    return cell;
+}
+
+- (void)performAction
+{
+    if (self.showPickerInCell){
+        BOOL shouldEdit = !_cell.isEditing;
+
+        [((QuickDialogController *)self.controller).quickDialogTableView endEditingOnVisibleCells];
+        [_cell setEditing:shouldEdit];
+        [((QuickDialogController *)self.controller).quickDialogTableView reloadRowHeights];
+    }
+}
+
+
+- (NSString *)textValue {
+    NSTimeInterval timeInterval = self.dateValue.timeIntervalSinceNow;
+    NSInteger ti = (NSInteger)timeInterval;
+    NSInteger seconds = ti % 60;
+    NSInteger minutes = (ti / 60) % 60;
+    NSInteger hours = (ti / 3600);
+    return [NSString stringWithFormat:@"%02i:%02i:%02i", hours, minutes, seconds];
+}
+
 
 - (void)fetchValueIntoObject:(id)obj {
 	if (_key==nil)
 		return;
     [obj setValue:_dateValue forKey:_key];
 }
+
+- (CGFloat)getRowHeightForTableView:(QuickDialogTableView *)tableView
+{
+    CGFloat height = [super getRowHeightForTableView:tableView];
+    if (!_cell.isEditing || !self.showPickerInCell) {
+        return height;
+    }
+    
+    return height + 200;
+}
+
 
 @end

@@ -12,11 +12,17 @@
 // permissions and limitations under the License.
 //
 
+#import "QEntryElement.h"
+#import "QuickDialog.h"
 @implementation QEntryElement
 
 @synthesize textValue = _textValue;
 @synthesize placeholder = _placeholder;
+@synthesize prefix = _prefix;
+@synthesize suffix = _suffix;
 @synthesize hiddenToolbar = _hiddenToolbar;
+
+@synthesize onValueChanged = _onValueChanged;
 
 @synthesize delegate = _delegate;
 
@@ -30,6 +36,7 @@
         self.returnKeyType = UIReturnKeyDefault;
         self.enablesReturnKeyAutomatically = NO;
         self.secureTextEntry = NO;
+        self.maxLength = 0;
     }
     return self;
 }
@@ -46,11 +53,18 @@
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
 
+    self.controller = controller;
+
     QEntryTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"QuickformEntryElement"];
     if (cell==nil){
         cell = [[QEntryTableViewCell alloc] init];
     }
-    cell.textField.enabled = YES;
+
+    [cell applyAppearanceForElement:self];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.textField.enabled = self.enabled;
+    cell.textField.userInteractionEnabled = self.enabled;
+    cell.textField.textAlignment = self.appearance.entryAlignment;
     cell.imageView.image = self.image;
     [cell prepareForElement:self inTableView:tableView];
     return cell;
@@ -61,6 +75,11 @@
 
 }
 
+- (void) fieldDidEndEditing
+{
+    [self performAction];
+}
+
 - (void)fetchValueIntoObject:(id)obj {
 	if (_key==nil)
 		return;
@@ -68,6 +87,18 @@
 	[obj setValue:_textValue forKey:_key];
 }
 
+- (BOOL)canTakeFocus {
+    return self.enabled && !self.hidden;
+}
+
+- (void)handleEditingChanged:(QEntryTableViewCell *)cell
+{
+    if(self.delegate && [self.delegate respondsToSelector:@selector(QEntryEditingChangedForElement:andCell:)]){
+        [self.delegate QEntryEditingChangedForElement:self andCell:cell];
+    }
+
+    [self handleEditingChanged];
+}
 
 #pragma mark - UITextInputTraits
 
@@ -79,7 +110,7 @@
 @synthesize enablesReturnKeyAutomatically = _enablesReturnKeyAutomatically;
 @synthesize secureTextEntry = _secureTextEntry;
 @synthesize clearsOnBeginEditing = _clearsOnBeginEditing;
-@synthesize accessoryType = _accessoryType;
+@synthesize customDateFormat = _customDateFormat;
 
 
 @end

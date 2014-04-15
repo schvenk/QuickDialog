@@ -15,14 +15,22 @@
 #import "QuickDialogTableView.h"
 #import "QLabelElement.h"
 
-@interface QFloatElement : QLabelElement {
+/**
+  QFloatElement: shows an slider control.
+*/
 
+@interface QFloatElement : QLabelElement {
+    
     float _floatValue;
+    float _minimumValue;
+    float _maximumValue;
 }
 
 @property(nonatomic, assign) float floatValue;
+@property(nonatomic, assign) float minimumValue;
+@property(nonatomic, assign) float maximumValue;
 
-
+- (QFloatElement *)init;
 - (QFloatElement *)initWithTitle:(NSString *)string value:(float)value;
 - (QElement *)initWithValue:(float)value;
 @end

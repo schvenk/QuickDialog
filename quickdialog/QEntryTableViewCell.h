@@ -14,11 +14,14 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "QuickDialog.h"
+#import "QTableViewCell.h"
+
 
 
 @class QEntryElement;
 @class QuickDialogTableView;
+@class QTextField;
+@class QImageElement;
 
 
 @interface QEntryTableViewCell : QTableViewCell<UITextFieldDelegate> {
@@ -43,13 +46,8 @@
 - (CGRect)calculateFrameForEntryElement;
 
 
-- (QEntryElement *)findNextElementToFocusOn;
-
 - (BOOL)handleActionBarDone:(UIBarButtonItem *)doneButton;
 
-- (QEntryElement *)findPreviousElementToFocusOn;
-
 - (void)recalculateEntryFieldPosition;
-
 
 @end

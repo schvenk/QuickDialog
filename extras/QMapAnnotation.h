@@ -13,24 +13,19 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreLocation/CoreLocation.h>
-
-@class QRootElement;
+#import <MapKit/MapKit.h>
 
 
-@interface QMapElement : QRootElement {
+@interface QMapAnnotation : NSObject<MKAnnotation> {
 
-@protected
+@private
     CLLocationCoordinate2D _coordinate;
+    NSString *_title;
+    NSString *_subtitle;
 }
 
-@property(nonatomic) CLLocationCoordinate2D coordinate;
+- (QMapAnnotation *)initWithCoordinate:(CLLocationCoordinate2D)coordinate title:(NSString *)title;
 
-- (QMapElement *)initWithTitle:(NSString *)string coordinate:(CLLocationCoordinate2D)param;
-
-- (void)setLat:(double)lat;
-
-- (void)setLng:(double)lng;
-
+@property (nonatomic, assign) CLLocationCoordinate2D coordinate;
 
 @end

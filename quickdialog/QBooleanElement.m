@@ -14,13 +14,14 @@
 
 #import <objc/message.h>
 
+#import "QBooleanElement.h"
+#import "QuickDialogController.h"
+
 @implementation QBooleanElement {
-    __unsafe_unretained QuickDialogController *_controller;
 }
 @synthesize onImage = _onImage;
 @synthesize offImage = _offImage;
 @synthesize boolValue = _boolValue;
-@synthesize enabled = _enabled;
 
 
 - (QBooleanElement *)init {
@@ -35,19 +36,31 @@
     return self;
 }
 
+-(void)setNumberValue:(NSNumber *)number {
+    self.boolValue = number.boolValue;
+}
+
+-(NSNumber *)numberValue {
+    return [NSNumber numberWithBool:self.boolValue];
+}
+
 - (void)setOnImageName:(NSString *)name {
-    self.onImage = [UIImage imageNamed:name];
+    if(name != nil) {
+        self.onImage = [UIImage imageNamed:name];
+    }
 }
 
 - (void)setOffImageName:(NSString *)name {
-    self.offImage = [UIImage imageNamed:name];
+    if(name != nil) {
+        self.offImage = [UIImage imageNamed:name];
+    }
 }
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
     UITableViewCell *cell = [super getCellForTableView:tableView controller:controller];
     cell.accessoryType = self.sections!= nil ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
     cell.selectionStyle = self.sections!= nil ? UITableViewCellSelectionStyleBlue: UITableViewCellSelectionStyleNone;
-    _controller = controller;
+
     if ((_onImage==nil) && (_offImage==nil))  {
         UISwitch *boolSwitch = [[UISwitch alloc] init];
         boolSwitch.on = self.boolValue;
@@ -57,8 +70,9 @@
 
     } else {
         UIButton *boolButton = [[UIButton alloc] init];
-        [boolButton setImage:self.offImage forState:UIControlStateNormal];
-        [boolButton setImage:self.onImage forState:UIControlStateSelected];
+        [boolButton setImage:self.offImage forState: UIControlStateNormal];
+        [boolButton setImage:self.onImage forState: UIControlStateSelected];
+        [boolButton setImage:self.onImage forState: UIControlStateSelected | UIControlStateDisabled];
         cell.accessoryView = boolButton;
         boolButton.enabled = self.enabled;
         boolButton.selected = self.boolValue;
@@ -71,31 +85,35 @@
 - (void)selected:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller indexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     self.boolValue = !self.boolValue;
-    if ([cell.accessoryView class] == [UIImageView class]){
-        ((UIImageView *)cell.accessoryView).image =  self.boolValue ? _onImage : _offImage;
+    if ([cell.accessoryView class] == [UIButton class]) {
+        ((UIButton *)cell.accessoryView).selected = self.boolValue;
     }
+    else if ([cell.accessoryView class] == [UISwitch class]) {
+        [((UISwitch *)cell.accessoryView) setOn:self.boolValue animated:YES];
+    }
+
     if (self.controllerAction==nil)
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self handleElementSelected:controller];
+    [self performAction];
 }
 
 - (void)buttonPressed:(UIButton *)boolButton {
     self.boolValue = !boolButton.selected;
     boolButton.selected = _boolValue;
-    if (_controller!=nil && self.controllerAccessoryAction!=nil) {
-        SEL selector = NSSelectorFromString(self.controllerAccessoryAction);
-        if ([_controller respondsToSelector:selector]) {
-            objc_msgSend(_controller,selector, self);
-        }  else {
-            NSLog(@"No method '%@' was found on controller %@", self.controllerAccessoryAction, [_controller class]);
-        }
-    }
+    [self performAccessoryAction];
+}
+
+-(void)setBoolValue:(BOOL)boolValue {
+    _boolValue = boolValue;
+    
+    [self handleEditingChanged];
 }
 
 - (void)switched:(id)boolSwitch {
     self.boolValue = ((UISwitch *)boolSwitch).on;
-    if (_controller!=nil && self.controllerAction!=nil)
-        [self handleElementSelected:_controller];
+    if ((self.controller != nil && self.controllerAction != nil) || _onSelected != nil) {
+        [self performAction];
+    }
 }
 
 - (void)fetchValueIntoObject:(id)obj {
@@ -103,6 +121,18 @@
 		return;
     [obj setValue:[NSNumber numberWithBool:self.boolValue] forKey:_key];
 }
+
+
+- (void)setNilValueForKey:(NSString *)key;
+{
+    if ([key isEqualToString:@"boolValue"]){
+        self.boolValue = NO;
+    }
+    else {
+        [super setNilValueForKey:key];
+    }
+}
+
 
 
 @end

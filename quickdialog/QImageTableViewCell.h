@@ -1,5 +1,5 @@
 //
-// Copyright 2011 ESCOZ Inc  - http://escoz.com
+// Copyright 2012 Ludovic Landry - http://about.me/ludoviclandry
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
 // file except in compliance with the License. You may obtain a copy of the License at
@@ -12,21 +12,23 @@
 // permissions and limitations under the License.
 //
 
+#import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
-#import "QRootElement.h"
+#import <QuartzCore/QuartzCore.h>
+#import "QEntryTableViewCell.h"
 
+@class QImageElement;
+@class QuickDialogTableView;
 
-@interface QRootElement (Builder)
+@interface QImageTableViewCell : QEntryTableViewCell {
 
-- (QRootElement *)initWithJSONFile:(NSString *)json andData:(id)data;
+   QImageElement *_imageElement;
+   UIButton *_imageViewButton;
+}
 
-- (QRootElement *)initWithJSONFile:(NSString *)jsonPath andDataJSONFile:(NSString *)dataPath;
+@property (nonatomic, retain) UIButton *imageViewButton;
 
-+ (QRootElement *)rootForJSON:(NSString *)json;
-
-
-- (QRootElement *)initWithJSONFile:(NSString *)jsonPath;
-
-+ (Class)JSONParserClass;
+- (void)prepareForElement:(QEntryElement *)element inTableView:(QuickDialogTableView *)tableView;
+- (void)createSubviews;
 
 @end

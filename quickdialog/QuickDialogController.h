@@ -14,12 +14,19 @@
 
 #import "QuickDialogTableView.h"
 
-@interface QuickDialogController : UIViewController {
+@class QRootElement;
+@class QuickDialogTableView;
+
+/**
+ QuickDialogController is a subclass of a UITableViewController that is responsible for actually displaying the dialog. For your application, you’ll very likely be creating subclasses of this class, one for each dialog you own. You’ll never really have to create objects of this type directly with alloc/init. The framework takes care of this for you.
+ */
+
+@interface QuickDialogController : UIViewController <UIPopoverControllerDelegate> {
 
 @private
     QRootElement *_root;
-    id <UITableViewDataSource> _dataSource;
-    id <UITableViewDelegate> _delegate;
+    //    id <UITableViewDataSource> _dataSource;
+    //    id <UITableViewDelegate> _delegate;
     QuickDialogTableView * _quickDialogTableView;
 
     void (^_willDisappearCallback)(void);
@@ -32,18 +39,24 @@
 @property(nonatomic) BOOL resizeWhenKeyboardPresented;
 
 
+@property(nonatomic, strong) UIPopoverController *popoverBeingPresented;
+@property(nonatomic, strong) UIPopoverController *popoverForChildRoot;
+
+
 - (void)loadView;
 
 - (QuickDialogController *)initWithRoot:(QRootElement *)rootElement;
-
-- (void)displayViewController:(UIViewController *)newController;
-
-- (void)displayViewControllerForRoot:(QRootElement *)element;
 
 - (QuickDialogController *)controllerForRoot:(QRootElement *)root;
 
 + (QuickDialogController *)controllerForRoot:(QRootElement *)root;
 
+/**
+ Called before a cell is removed from the tableView. Return YES and QuickDialog will delete the cell, return NO if you want to delete the cell or reload the tableView yourself.
+*/
+- (BOOL)shouldDeleteElement:(QElement *)element;
+
 + (UINavigationController *)controllerWithNavigationForRoot:(QRootElement *)root;
+
 
 @end

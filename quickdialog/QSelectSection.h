@@ -7,8 +7,9 @@
 //
 
 #import "QSection.h"
+#import "QDynamicDataSection.h"
 
-@interface QSelectSection : QSection
+@interface QSelectSection : QDynamicDataSection
 {
     NSMutableArray *_items;
 }
@@ -19,12 +20,17 @@
 
 @property (nonatomic)           BOOL             multipleAllowed;
 
-- (QSelectSection *)initWithItems:(NSArray *)stringArray selectedIndexes:(NSArray *)selected;
-- (QSelectSection *)initWithItems:(NSArray *)stringArray selectedIndexes:(NSArray *)selected title:(NSString *)title;
-- (QSelectSection *)initWithItems:(NSArray *)stringArray selectedItems:(NSArray *)selectedItems title:(NSString *)title;
+@property(nonatomic, copy) void (^onSelected)(void);
 
-- (QSelectSection *)initWithItems:(NSArray *)stringArray selected:(NSUInteger)selected;
-- (QSelectSection *)initWithItems:(NSArray *)stringArray selected:(NSUInteger)selected title:(NSString *)title;
+
+@property(nonatomic) BOOL deselectAllowed;
+
+- (id)initWithItems:(NSArray *)stringArray selectedIndexes:(NSArray *)selected;
+- (id)initWithItems:(NSArray *)stringArray selectedIndexes:(NSArray *)selected title:(NSString *)title;
+- (id)initWithItems:(NSArray *)stringArray selectedItems:(NSArray *)selectedItems title:(NSString *)title;
+
+- (id)initWithItems:(NSArray *)stringArray selected:(NSUInteger)selected;
+- (id)initWithItems:(NSArray *)stringArray selected:(NSUInteger)selected title:(NSString *)title;
 
 - (void)addOption:(NSString *)option;
 - (void)insertOption:(NSString *)option atIndex:(NSUInteger)index;

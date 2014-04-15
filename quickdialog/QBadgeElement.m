@@ -13,6 +13,8 @@
 //
 
 #import "QBadgeTableCell.h"
+#import "QBadgeElement.h"
+#import "QuickDialog.h"
 
 @implementation QBadgeElement {
 
@@ -23,23 +25,31 @@
 
 - (QBadgeElement *)init {
     self = [super init];
-    _badgeColor = [UIColor colorWithRed:0.530f green:0.600f blue:0.738f alpha:1.000f];
+    _badgeColor = nil;
     _badgeTextColor = [UIColor whiteColor];
     return self;
 }
 
 - (QBadgeElement *)initWithTitle:(NSString *)title Value:(NSString *)value {
     self = [self init];
-    _title = title;
-    _badge = value;
+	if (self) {
+		_title = title;
+		_badge = value;
+	}
     return self;
 }
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
     QBadgeTableCell *cell = [[QBadgeTableCell alloc] init];
     cell.textLabel.text = _title;
-    cell.badgeLabel.badgeColor = _badgeColor;
+    [cell applyAppearanceForElement:self];
     cell.badgeLabel.textColor = _badgeTextColor;
+
+    if ([cell respondsToSelector:@selector(tintColor)])
+        cell.badgeLabel.badgeColor = _badgeColor == nil ? cell.tintColor : _badgeTextColor;
+    else
+       cell.badgeLabel.badgeColor = _badgeColor;
+
     cell.badgeLabel.text = _badge;
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;

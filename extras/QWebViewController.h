@@ -12,19 +12,19 @@
 // permissions and limitations under the License.
 //
 
-#import <Foundation/Foundation.h>
-#import <CoreLocation/CoreLocation.h>
-#import <MapKit/MapKit.h>
 
-@interface QMapViewController : UIViewController <MKMapViewDelegate> {
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+
+@interface QWebViewController : UIViewController <UIWebViewDelegate> {
 
 @private
-    CLLocationCoordinate2D _coordinate;
-    MKMapView * _mapView;
-    NSString *_mapTitle;
+    UIWebView *_webView;
+    NSString *_url;
+    NSString *_html;
 }
 
-- (QMapViewController *)initWithCoordinate:(CLLocationCoordinate2D)d;
-
-- (QMapViewController *)initWithTitle:(NSString *)string coordinate:(CLLocationCoordinate2D)d;
+- (QWebViewController *)initWithUrl:(NSString *)string;
+- (QWebViewController *)initWithHTML:(NSString *)html;
 @end

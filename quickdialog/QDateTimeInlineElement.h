@@ -15,10 +15,13 @@
 #import "QuickDialogTableView.h"
 #import "QEntryElement.h"
 
+@class QDateEntryTableViewCell;
+
 @interface QDateTimeInlineElement : QEntryElement {
     NSDate * _dateValue;
 @private
     UIDatePickerMode _mode;
+    NSInteger _minuteInterval;
     BOOL _centerLabel;
 }
 
@@ -27,18 +30,18 @@
 
 @property (assign) UIDatePickerMode mode;
 
+@property (assign) NSInteger minuteInterval;
+
 @property(nonatomic) BOOL centerLabel;
 
 @property(nonatomic, strong) NSDate *maximumDate;
 
 @property(nonatomic, strong) NSDate *minimumDate;
 
+@property(nonatomic) BOOL showPickerInCell;
 
-- (QDateTimeInlineElement *)initWithDate:(NSDate *)date;
+- (QDateTimeInlineElement *)initWithDate:(NSDate *)date andMode:(UIDatePickerMode)mode;
 
-- (QDateTimeInlineElement *)initWithTitle:(NSString *)string date:(NSDate *)date;
-
-
-@property(nonatomic, copy) void (^onValueChanged)(void);
+- (QDateTimeInlineElement *)initWithTitle:(NSString *)string date:(NSDate *)date andMode:(UIDatePickerMode)mode;
 
 @end

@@ -9,11 +9,13 @@
 }
 
 @property (nonatomic, strong) id<QPickerValueParser> valueParser;
-@property (nonatomic, copy) void (^onValueChanged)(void);
 
 @property (nonatomic, strong) NSArray *items;
 @property (nonatomic, readonly) NSArray *selectedIndexes;
 
 - (QPickerElement *)initWithTitle:(NSString *)title items:(NSArray *)items value:(id)value;
+
+- (void)reloadAllComponents;
+- (void)reloadComponent:(NSInteger)index;
 
 @end

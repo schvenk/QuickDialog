@@ -1,24 +1,23 @@
 #import "QPickerElement.h"
 #import "QPickerTableViewCell.h"
-#import "QPickerWhitespaceDelimitedStringParser.h"
+#import "QPickerTabDelimitedStringParser.h"
 
 @implementation QPickerElement
 {
 @private
     NSArray *_items;
-    void (^_onValueChanged)();
     
     UIPickerView *_pickerView;
 }
 
 @synthesize items = _items;
 @synthesize valueParser = _valueParser;
-@synthesize onValueChanged = _onValueChanged;
 
 - (QPickerElement *)init
 {
     if (self = [super init]) {
-        self.valueParser = [QPickerWhitespaceDelimitedStringParser new];
+        self.valueParser = [QPickerTabDelimitedStringParser new];
+        self.keepSelected = YES;
     }
     return self;
 }
@@ -27,7 +26,7 @@
 {
     if ((self = [super initWithTitle:title Value:value])) {
         _items = items;
-        self.valueParser = [QPickerWhitespaceDelimitedStringParser new];
+        self.valueParser = [QPickerTabDelimitedStringParser new];
     }
     return self;
 }
@@ -38,6 +37,7 @@
     if (cell == nil) {
         cell = [[QPickerTableViewCell alloc] init];
     }
+    [cell applyAppearanceForElement:self];
 
     UIPickerView *pickerView = nil;
     [cell prepareForElement:self inTableView:tableView pickerView:&pickerView];
@@ -64,4 +64,13 @@
     return selectedIndexes;
 }
 
+- (void)reloadAllComponents
+{
+    [_pickerView reloadAllComponents];
+}
+
+- (void)reloadComponent:(NSInteger)index
+{
+    [_pickerView reloadComponent:index];
+}
 @end

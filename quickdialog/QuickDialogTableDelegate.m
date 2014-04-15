@@ -12,6 +12,9 @@
 // permissions and limitations under the License.
 //
 
+#import <sys/ucred.h>
+#import "QuickDialogTableDelegate.h"
+#import "QuickDialog.h"
 @implementation QuickDialogTableDelegate
 
 
@@ -20,15 +23,15 @@
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
-    QSection *section = [_tableView.root getSectionForIndex:indexPath.section];
-    QElement * element = [section.elements objectAtIndex:(NSUInteger) indexPath.row];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:indexPath.section];
+    QElement * element = [section getVisibleElementForIndex: indexPath.row];
 
     [element selectedAccessory:_tableView controller:_tableView.controller indexPath:indexPath];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    QSection *section = [_tableView.root getSectionForIndex:indexPath.section];
-    QElement * element = [section.elements objectAtIndex:(NSUInteger) indexPath.row];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:indexPath.section];
+    QElement * element = [section getVisibleElementForIndex: indexPath.row];
 
     [element selected:_tableView controller:_tableView.controller indexPath:indexPath];
 }
@@ -43,94 +46,77 @@
 
 
 - (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
-    QSection *section = [_tableView.root getSectionForIndex:indexPath.section];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:indexPath.section];
     return section.canDeleteRows ? UITableViewCellEditingStyleDelete : UITableViewCellEditingStyleNone;
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
+    return NO;
 }
 - (NSIndexPath *)tableView:(UITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath
 {
-    BOOL isDestinationOK = [[_tableView.root getSectionForIndex:proposedDestinationIndexPath.section] isKindOfClass:[QSortingSection class]];
+    BOOL isDestinationOK = [[_tableView.root getVisibleSectionForIndex:proposedDestinationIndexPath.section] isKindOfClass:[QSortingSection class]];
     return isDestinationOK ? proposedDestinationIndexPath : sourceIndexPath;
 
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    QSection *section = [_tableView.root getSectionForIndex:indexPath.section];
-    QElement * element = [section.elements objectAtIndex:(NSUInteger) indexPath.row];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:indexPath.section];
+    QElement * element = [section getVisibleElementForIndex: indexPath.row];
     return [element getRowHeightForTableView:(QuickDialogTableView *) tableView];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)index {
-    QSection *section = [_tableView.root getSectionForIndex:index];
-
-    if (section.headerView==nil && _tableView.styleProvider!=nil && [_tableView.styleProvider respondsToSelector:@selector(sectionHeaderWillAppearForSection:atIndex:)]){
-        [_tableView.styleProvider sectionHeaderWillAppearForSection:section atIndex:index];
-    }
-
-    if (section.headerView!=nil)
-            return section.headerView.frame.size.height;
-
-    if (section.title==nil)
-        return 0;
-
-    if (!_tableView.root.grouped)
-        return 22.f;
-
-    CGFloat stringTitleHeight = 0;
-
-    if (section.title != nil) {
-        CGFloat maxWidth = [UIScreen mainScreen].bounds.size.width - 20;
-        CGFloat maxHeight = 9999;
-        CGSize maximumLabelSize = CGSizeMake(maxWidth,maxHeight);
-        CGSize expectedLabelSize = [section.title sizeWithFont:[UIFont systemFontOfSize:[UIFont labelFontSize]]
-                                              constrainedToSize:maximumLabelSize
-                                                  lineBreakMode:UILineBreakModeWordWrap];
-
-        stringTitleHeight = expectedLabelSize.height+23.f;
-    }
-
-
-    return section.title != NULL? stringTitleHeight : 0;
+    QSection *section = [_tableView.root getVisibleSectionForIndex:index];
+    return [_tableView.root.appearance heightForHeaderInSection:section andTableView:_tableView andIndex:index];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)index {
-    QSection *section = [_tableView.root getSectionForIndex:index];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:index];
+    return [_tableView.root.appearance heightForFooterInSection:section andTableView:_tableView andIndex:index];
+}
 
-    if (section.footerView==nil && _tableView.styleProvider!=nil && [_tableView.styleProvider respondsToSelector:@selector(sectionFooterWillAppearForSection:atIndex:)]){
-        [_tableView.styleProvider sectionFooterWillAppearForSection:section atIndex:index];
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    QSection *section = [_tableView.root getVisibleSectionForIndex:indexPath.section];
+    QElement *element = [section getVisibleElementForIndex: indexPath.row];
+    [_tableView.root.appearance cell:cell willAppearForElement:element atIndexPath:indexPath];
+
+    if ([_tableView.quickDialogDelegate respondsToSelector:@selector(cell:willAppearForElement:atIndexPath:)]){
+        [_tableView.quickDialogDelegate cell:cell willAppearForElement:element atIndexPath:indexPath];
     }
-
-    if (section.footerView!=nil)
-            return section.footerView.frame.size.height;
-
-    CGFloat stringFooterHeight = 28.0;
-
-    if (section.footer != nil) {
-        CGFloat maxWidth = [UIScreen mainScreen].bounds.size.width - 20;
-        CGFloat maxHeight = 9999;
-        CGSize maximumLabelSize = CGSizeMake(maxWidth,maxHeight);
-        CGSize expectedLabelSize = [section.footer sizeWithFont:[UIFont systemFontOfSize:[UIFont labelFontSize]]
-                                              constrainedToSize:maximumLabelSize
-                                                  lineBreakMode:UILineBreakModeWordWrap];
-
-        stringFooterHeight = expectedLabelSize.height+5;
-    }
-
-    return section.footer != NULL? stringFooterHeight : 0;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)index {
-    QSection *section = [_tableView.root getSectionForIndex:index];
+    QSection *section = [_tableView.root getVisibleSectionForIndex:index];
+    if (section.headerView!=nil)
+        return section.headerView;
 
-    return section.headerView;
+    QAppearance *appearance = ((QuickDialogTableView *) tableView).root.appearance;
+    UIView *header = [appearance buildHeaderForSection:section andTableView:(QuickDialogTableView*)tableView andIndex:index];
+    if ([_tableView.quickDialogDelegate respondsToSelector:@selector(header:willAppearForSection:atIndex:)]){
+        [_tableView.quickDialogDelegate header:header willAppearForSection:section atIndex:index];
+    }
+
+    if (section.headerView!=nil)
+        return section.headerView;
+
+    return header;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)index {
-    QSection *section = [_tableView.root getSectionForIndex:index];
-    return section.footerView;
+    QSection *section = [_tableView.root getVisibleSectionForIndex:index];
+    if (section.footerView!=nil)
+        return section.footerView;
+
+    QAppearance *appearance = ((QuickDialogTableView *) tableView).root.appearance;
+    UIView *footer = [appearance buildFooterForSection:section andTableView:(QuickDialogTableView*)tableView andIndex:index];
+    if ([_tableView.quickDialogDelegate respondsToSelector:@selector(footer:willAppearForSection:atIndex:)]){
+        [_tableView.quickDialogDelegate footer:footer willAppearForSection:section atIndex:index];
+    }
+    if (section.footerView!=nil)
+        return section.footerView;
+
+    return footer;
 }
 
 

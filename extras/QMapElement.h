@@ -12,17 +12,28 @@
 // permissions and limitations under the License.
 //
 
-
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
+#import "QRootElement.h"
 
-@interface QWebViewController : UIViewController <UIWebViewDelegate> {
+/**
+  QMapElement: when selected, shows a fullscreen map with the location selected. Requires a lat/long value.
+*/
 
-@private
-    UIWebView *_webView;
-    NSString *_url;
+@interface QMapElement : QRootElement {
+
+@protected
+    CLLocationCoordinate2D _coordinate;
 }
 
-- (QWebViewController *)initWithUrl:(NSString *)string;
+@property(nonatomic) CLLocationCoordinate2D coordinate;
+
+- (QMapElement *)initWithTitle:(NSString *)string coordinate:(CLLocationCoordinate2D)param;
+
+- (void)setLat:(double)lat;
+
+- (void)setLng:(double)lng;
+
+
 @end

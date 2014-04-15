@@ -12,8 +12,13 @@
 // permissions and limitations under the License.
 //
 #import "QLabelElement.h"
+#import "QEntryTableViewCell.h"
 
 @protocol QuickDialogEntryElementDelegate;
+
+/**
+  QEntryElement: input field to allow you to collect values from the user. Automatically resizes so that all entries in the same sections look alike.
+*/
 
 @interface QEntryElement : QLabelElement <UITextInputTraits> {
 
@@ -24,9 +29,12 @@
     BOOL _hiddenToolbar;
 }
 
-@property(nonatomic, strong) NSString *textValue;
-@property(nonatomic, strong) NSString *placeholder;
-@property(assign) BOOL hiddenToolbar;
+@property (nonatomic, strong) NSString *textValue;
+@property (nonatomic, strong) NSString *placeholder;
+@property (nonatomic, strong) NSString *prefix;
+@property (nonatomic, strong) NSString *suffix;
+@property (atomic, assign) int maxLength;
+@property (assign) BOOL hiddenToolbar;
 
 @property(nonatomic, unsafe_unretained) id<QuickDialogEntryElementDelegate> delegate;
 
@@ -39,8 +47,15 @@
 @property(nonatomic,getter=isSecureTextEntry) BOOL secureTextEntry;       // default is NO
 @property(nonatomic, assign) BOOL clearsOnBeginEditing;                   // default is NO
 
+@property(nonatomic, copy) NSString *customDateFormat;
 
 - (QEntryElement *)init;
-
 - (QEntryElement *)initWithTitle:(NSString *)string Value:(NSString *)param Placeholder:(NSString *)string1;
+
+- (BOOL)canTakeFocus;
+
+- (void) fieldDidEndEditing;
+
+- (void)handleEditingChanged:(QEntryTableViewCell *)cell;
+
 @end

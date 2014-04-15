@@ -22,22 +22,44 @@
     NSUInteger _fractionDigits;
 }
 
-@synthesize floatValue = _floatValue;
+@synthesize numberValue = _numberValue;
 @synthesize fractionDigits = _fractionDigits;
 
 
-- (QDecimalElement *)initWithTitle:(NSString *)title value:(float)value {
-    self = [super initWithTitle:title Value:nil] ;
-    _floatValue = value;
+- (QDecimalElement *)initWithTitle:(NSString *)title value:(NSNumber *)value {
+    self = [super initWithTitle:title Value:nil];
+    if (self) {
+        _numberValue = value;
+        self.keyboardType = UIKeyboardTypeDecimalPad;
+    }
     return self;
 }
 
+- (void)setFloatValue:(NSNumber *)floatValue {
+    _numberValue = floatValue;
+    if (_numberValue==nil)
+        _numberValue = @0;
+}
 
-- (QDecimalElement *)initWithValue:(float)value {
+- (QDecimalElement *)initWithValue:(NSNumber *)value {
     self = [super init];
-    _floatValue = value;
+    if (self) {
+        _numberValue = value;
+        self.keyboardType = UIKeyboardTypeDecimalPad;
+    }
     return self;
 }
+
+- (QEntryElement *)init {
+    self = [super init];
+    if (self) {
+        _numberValue = @0;
+        self.keyboardType = UIKeyboardTypeDecimalPad;
+    }
+
+    return self;
+}
+
 
 - (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
 
@@ -46,14 +68,15 @@
         cell = [[QDecimalTableViewCell alloc] init];
     }
     [cell prepareForElement:self inTableView:tableView];
-    return cell;
+    cell.textField.userInteractionEnabled = self.enabled;
 
+    return cell;
 }
 
 - (void)fetchValueIntoObject:(id)obj {
 	if (_key==nil)
 		return;
-    [obj setValue:[NSNumber numberWithFloat:_floatValue] forKey:_key];
+    [obj setValue:_numberValue forKey:_key];
 }
 
 @end

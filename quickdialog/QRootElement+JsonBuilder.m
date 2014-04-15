@@ -16,7 +16,7 @@
 #import <objc/runtime.h>
 #import "QRootBuilder.h"
 
-@implementation QRootElement (Builder)
+@implementation QRootElement (JsonBuilder)
 
 
 - (QRootElement *)initWithJSONFile:(NSString *)jsonPath {
@@ -34,15 +34,25 @@
 
     NSError *jsonParsingError = nil;
     NSString *filePath = [[NSBundle mainBundle] pathForResource:jsonPath ofType:@"json"];
-    NSDictionary *jsonRoot = [JSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:filePath] options:0 error:&jsonParsingError];
+    NSData *jsonData = [NSData dataWithContentsOfFile:filePath];
+    if (jsonData==nil)
+            NSLog(@"Couldn't read any data for JSON file named: %@", jsonPath);
 
-    self = [[QRootBuilder new] buildSectionsWithObject:jsonRoot];
-    if (data!=nil)
-        [self bindToObject:data];
+    NSDictionary *jsonRoot = [JSONSerialization JSONObjectWithData:jsonData options:0 error:&jsonParsingError];
 
+    if (jsonParsingError!=nil)
+        NSLog(@"Parsing error: %@", jsonParsingError.localizedDescription);
+    self = [self initWithJSON:jsonRoot andData:data];
     return self;
 }
 
+- (QRootElement *)initWithJSON:(id)jsonRoot andData:(id)data {
+
+    self = [[QRootBuilder new] buildWithObject:jsonRoot];
+    if (data!=nil)
+        [self bindToObject:data];
+    return self;
+}
 
 - (QRootElement *)initWithJSONFile:(NSString *)jsonPath andDataJSONFile:(NSString *)dataPath {
     Class JSONSerialization = [QRootElement JSONParserClass];
@@ -56,7 +66,7 @@
 }
 
 + (QRootElement *)rootForJSON:(NSString *)json {
-    QRootElement *root = [[QRootElement alloc] initWithJSONFile:json];
+    QRootElement *root = [[self alloc] initWithJSONFile:json];
     return root;
 }
 
